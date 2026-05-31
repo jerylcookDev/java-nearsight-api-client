@@ -1,0 +1,110 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ai.nearsight.sample</groupId>
+	<artifactId>nearsight-api-feeder</artifactId> 
+ 
+	<version>0.1.0-SNAPSHOT</version>  
+ 
+	<name>nearsight-api-feeder</name>
+	<description>NearSight API feeder of informnation</description>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>4.0.5</version>
+		<relativePath /> <!-- lookup parent from repository -->
+	</parent>
+	<properties>
+		<start-class>ai.nearsight.core.app.NearSightMCPServerApp</start-class>
+		<java.version>21</java.version>
+		<spring-ai.version>1.1.4</spring-ai.version>
+		<spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration</spring.autoconfigure.exclude>
+	</properties>
+	<distributionManagement>
+	    <repository>
+	        <id>github</id>
+	        <name>GitHub Packages</name>
+	        <url>https://maven.pkg.github.com/boundaries-io/nearsight-private-libs</url>
+	    </repository>
+	    <snapshotRepository>
+	        <id>github</id>
+	        <name>GitHub Packages</name>
+	        <url>https://maven.pkg.github.com/boundaries-io/nearsight-private-libs</url>
+	    </snapshotRepository>
+	</distributionManagement>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>2025.1.1</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+	<dependencies>
+       <!-- Reactive web: serves the Traccar ingest controller AND provides WebClient -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+        <!-- OAuth2 client-credentials: manages the OpenSky bearer token -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+        <!-- MongoDB: Geofence document + GeofenceDao (2dsphere geo queries) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!-- Bean validation for inbound ingest DTOs (@Valid on the Traccar payload) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Resilience4j circuit breaker around the flaky/unmaintained OpenSky calls -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <!-- @ConfigurationProperties metadata (NearsightClientProperties, etc.) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+        </plugin>
+		</plugins>
+	</build>
+</project>

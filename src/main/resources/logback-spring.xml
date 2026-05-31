@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ai.nearsight.mcp" level="debug" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.springframework.ai" level="debug" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.springframework" level="info" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.apache.catalina" level="info" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.apache.tomcat" level="info" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.mongodb.driver" level="info" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="org.apache.hc.client5" level="info" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+
+    <logger name="net.javacrumbs" level="warn" additivity="false">
+        <appender-ref ref="console" />
+    </logger>
+     <logger name="ai.nearsight.core.domain" level="warn" additivity="false">
+        <appender-ref ref="console" />
+    </logger>   
+    
+
+    <root level="info">
+        <appender-ref ref="console" />
+    </root>
+</configuration>

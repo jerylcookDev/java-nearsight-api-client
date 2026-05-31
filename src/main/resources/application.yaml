@@ -1,0 +1,26 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          opensky:
+            authorization-grant-type: client_credentials
+            client-id: ${OPENSKY_CLIENT_ID}
+            client-secret: ${OPENSKY_CLIENT_SECRET}
+        provider:
+          opensky:
+            token-uri: https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token
+
+nearsight:
+  client:
+    base-url: https://api1.nearsight.ai
+    api-key: ${NEARSIGHT_API_KEY}
+  feed:
+    opensky:
+      enabled: true
+      poll-interval-seconds: 10
+      box:            # DC metro area
+        la-min: 38.79
+        lo-min: -77.12
+        la-max: 38.996
+        lo-max: -76.91

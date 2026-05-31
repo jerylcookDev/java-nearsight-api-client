@@ -1,0 +1,19 @@
+image: maven:3.9-eclipse-temurin-21-alpine
+options:
+  docker: true
+
+definitions:
+  services:
+    docker:
+      memory: 3072
+  
+pipelines:
+  default:
+      - step:
+          name: 'Build, Test and push to gitlab private lib'
+          caches:
+            - maven
+          script:
+            - export DOCKER_BUILDKIT=1
+            - echo "build and test."
+            - mvn  clean deploy -DskipTests=true -s settings.xml
