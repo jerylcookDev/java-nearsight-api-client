@@ -1,98 +1,86 @@
-# Nearsight MCP Server
+# java-nearsight-api-client
 
-This project requires a running [Ollama](https://ollama.ai) instance with the **llama3** model installed.
+Sample Java client that polls OpenSky (state vectors) and forwards tracked assets to a NearSight API.
 
-We use  @Tool annotation in Spring AI to allow NearSight MCP server to register functions as agent discoverable tools — for example, so an agent framework (LangChain4j, Spring AI agent routing, or MCP clients). Tehse tools can automatically discover and call your endpoints.
+This module is a small Spring Boot-based example showing how to:
 
----
+- Configure a reactive WebClient that authenticates to OpenSky using OAuth2 client credentials
+- Map OpenSky state vectors to a NearSight `TrackedAsset` model
+- Periodically poll OpenSky for aircraft in a bounding box and POST those assets to a NearSight ingest endpoint
 
-## 🚀 Prerequisites
+Key implementation notes
+- Main example app class: `ai.nearsight.sample.app.OpenSkypeApp`
+- Polling/ingest component: `ai.nearsight.sample.app.PopulateNearSight`
+- Configuration properties are defined under the `nearsight` prefix and in `application.yaml`.
 
-- Docker installed and running
-- ~4GB free disk space for the `llama3` model
-- install node.sh for working with claude
+Prerequisites
+- Java 21 (project uses Java 21 language features)
+- Maven 3.8+ (or a modern Maven compatible with Spring Boot 4.x)
+- Network access to OpenSky token endpoint and API, and to your NearSight API endpoint
 
-npm install -g @anthropic-ai/mcpb
-mcpb init
-mcpb pack
+Build
 
----
-
-## 🐳 Run Ollama in Docker
-
-Start Ollama as a background container:
-
-```bash
-docker run -d  --name ollama  -p 11434:11434   -v ollama:/root/.ollama ollama/ollama --swap
-
-
-   curl -X POST http://localhost:11434/api/generate \
-     -d '{
-           "model": "llama3",
-           "prompt": "Why is the sky blue?"
-         }'
-
-
-```
-## 🔧 Environment Settings
-  
-The MCP server requires the following environment variables:
-
-| Variable            | Description                                   | Example Value            |
-|---------------------|-----------------------------------------------|--------------------------|
-| `OLLAMA_BASE_URL`   | Base URL of the Ollama server                 | `http://localhost:11434` |
-| `OLLAMA_CHAT_MODEL` | Default Ollama model for chat/inference       | `llama3`                 |
-| `MCP_AUTH_KEY`      | Authentication key for securing MCP endpoints | `your-secret-key`        |
-### Setting Environment Variables
-
-On **Linux / macOS**:
+From the project root (this repository folder):
 
 ```bash
-export OLLAMA_BASE_URL=http://localhost:11434
-export OLLAMA_CHAT_MODEL=llama3
-export MCP_AUTH_KEY=your-secret-key
+mvn -DskipTests package
 ```
 
+Run (dev)
 
- 
-### First steps
-Start mongoDB
+You can run the sample app from Maven or your IDE. The sample main class is `ai.nearsight.sample.app.OpenSkypeApp`.
 
-```
-docker run -d \
-  --name my-mongo \
-  -p 27017:27017 \
-  mongo:7.0
+Run with Maven:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.main-class=ai.nearsight.sample.app.OpenSkypeApp
 ```
 
-Get ollama
+Or run from your IDE by launching `OpenSkypeApp`.
 
-```
-docker run -d  --name ollama --gpus all -it  -p 11434:11434   -v ollama:/root/.ollama ollama/ollama
+Configuration
 
-#this below worked..
-docker run --gpus all -it \
-  -p 11434:11434 \
-  ollama/ollama
+The project includes `src/main/resources/application.yaml` with example values. The following environment variables must be provided (or set the properties in your external configuration):
 
-```
+- `NEARSIGHT_API_KEY` — API key used by this client to authenticate to the NearSight ingest endpoint (sent as `X-API-Key`).
+- `OPENSKY_CLIENT_ID` — OAuth2 client id for OpenSky
+- `OPENSKY_CLIENT_SECRET` — OAuth2 client secret for OpenSky
 
-```
-docker start ollama
+Relevant properties from `application.yaml`:
 
-docker exec -it ollama bash
+- `nearsight.client.base-url` — base URL for your NearSight API (example: `https://api1.nearsight.ai`)
+- `nearsight.client.api-key` — (prefer to provide via `NEARSIGHT_API_KEY` env var)
+- `nearsight.feed.opensky.enabled` — enable/disable the polling feed
+- `nearsight.feed.opensky.poll-interval-seconds` — how often to poll OpenSky
+- `nearsight.feed.opensky.box` — bounding box to query (la-min, lo-min, la-max, lo-max)
 
-   ollama pull llama3.1
-   ollama run llama4
-   
-   ollama run llama4 -p "Explain quantum entanglement simply."
-   
-   talk to chat directly
-   ollama run llama3.1
-```
-- nvidia-smi prints GPU status.
-docker run --rm --gpus all nvidia/cuda:13.0 nvidia-smi
+The OAuth2 OpenSky registration is configured in `application.yaml` under `spring.security.oauth2.client.registration.opensky`.
 
+Behavior
 
- /c/users/twoen/AppData/Roaming/Claude/logs
- 
+- On each scheduled tick `PopulateNearSight` queries OpenSky `/states/all` for the configured bounding box.
+- Each state vector row is mapped to a `TrackedAsset` (class `ai.nearsight.sample.model.TrackedAsset`) by `OpenSkyMapper`.
+- The client posts each `TrackedAsset` to the NearSight ingest path `/api/v1/assets/track` using the configured `nearsightWebClient` which sends `X-API-Key`.
+- The component contains simple resilience: a circuit breaker for OpenSky calls and retry/backoff for rate-limited responses.
+
+Notes & caveats
+- The sample `application.yaml` uses interpolation to read secrets from environment variables. Do not hardcode secrets in source control.
+- The `pom.xml` declares Spring Boot 4.x and requires a compatible JDK and Maven. If you run into build issues, ensure your local tooling matches those versions.
+- The `start-class` property in the `pom.xml` may point to a different main class in some parent templates — when running locally specify the `spring-boot.run.main-class` as shown above if needed.
+
+Development & testing
+
+- There are no integration tests shipped in this sample. Add tests under `src/test/java` and run `mvn test`.
+
+Contributing
+
+If you want to extend this sample:
+
+- Add support for additional feeds or additional mapping logic in `OpenSkyMapper`.
+- Add configuration to control concurrency or ingest paths.
+- Add unit and integration tests.
+
+License
+
+This repository does not include a license file. Add your preferred license in `LICENSE` if you intend to publish or share the code.
+
