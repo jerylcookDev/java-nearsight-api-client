@@ -8,6 +8,14 @@ import org.springframework.security.oauth2.client.registration.ReactiveClientReg
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * Configures a {@link WebClient} for calls to the OpenSky API.
+ *
+ * <p>The client is set up with an OAuth2 authorized client manager and a
+ * default client registration id of {@code opensky}. OAuth2 client
+ * registrations should be provided via Spring configuration (see
+ * {@code application.yaml}).</p>
+ */
 @Configuration
 public class OpenSkyClientConfig {
 
