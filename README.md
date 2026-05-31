@@ -1,6 +1,8 @@
 # java-nearsight-api-client
 
 Sample Java client that polls OpenSky (state vectors) and forwards tracked assets to a NearSight API.
+To obtain a NEARSIGHT API, register https://mcp.nearsight.ai/mcp in Claude or ChatGPT. a key will be emailed after
+signup
 
 This module is a small Spring Boot-based example showing how to:
 
